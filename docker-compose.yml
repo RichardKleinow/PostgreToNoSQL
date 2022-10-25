@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    restart: unless-stopped
+    volumes:
+        - ./postgres:/data/dump
+        - ./postgres/init-dump.sh:/docker-entrypoint-initdb.d/init-dump.sh
+    environment: 
+        POSTGRES_USER: ${POSTGRES_USER:-postgres}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+        PGDATA: /data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@admin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    volumes:
+        - ./pgadmin/servers.json:/pgadmin4/servers.json
+        - ./pgadmin/pgpass:/pgpass
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - postgres 
+    entrypoint: >
+      /bin/sh -c "
+      cp -f /pgpass /var/lib/pgadmin/;
+      chmod 600 /var/lib/pgadmin/pgpass;
+      chown pgadmin:pgadmin /var/lib/pgadmin/pgpass;
+      /entrypoint.sh
+      "
+
+      
+networks:
+  postgres:
+    driver: bridge
