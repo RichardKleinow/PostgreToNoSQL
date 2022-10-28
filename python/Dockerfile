@@ -1,7 +1,16 @@
 FROM python:latest
-RUN mkdir /usr/src/app
-WORKDIR /usr/src/app
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip
+
+RUN useradd -m user
+USER user
+WORKDIR /home/user
+
+COPY --chown=user:user ./requirements.txt requirements.txt
+COPY --chown=user:user ./src/transfer.py transfer.py
+
+RUN pip install --user -r requirements.txt
+
+ENV PATH="/home/user/.local/bin:${PATH}"
 ENV PYTHONUNBUFFERED 1
-COPY ./src /usr/src/app
+
+CMD ["python", "transfer.py"]
