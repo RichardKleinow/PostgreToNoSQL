@@ -18,23 +18,17 @@ services:
       
   pgadmin:
     container_name: pgadmin_container
-    image: dpage/pgadmin4:latest
+    build: ./pgadmin/.
+    image: pgadmin
     restart: unless-stopped
     env_file: ./secrets/secrets_pgadmin.txt
     volumes:
         - ./pgadmin/servers.json:/pgadmin4/servers.json
-        - ./pgadmin/pgpass:/pgpass
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
       - postgres 
-    entrypoint: >
-      /bin/sh -c "
-      cp -f /pgpass /var/lib/pgadmin/;
-      chmod 600 /var/lib/pgadmin/pgpass;
-      chown pgadmin:pgadmin /var/lib/pgadmin/pgpass;
-      /entrypoint.sh
-      "
+
     
   mongo:
     container_name: mongo_container
@@ -57,8 +51,8 @@ services:
       
   python:
     container_name: python_container
-    restart: unless-stopped
     build: ./python/.
+    restart: unless-stopped
     image: pythonscript_container
     networks:
       - postgres
