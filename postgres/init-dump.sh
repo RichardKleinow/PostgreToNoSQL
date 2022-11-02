@@ -1,4 +1,9 @@
 #!/bin/bash
+env|sort
+whoami
+id
+
+
 set -e
 
 for filename in /data/dump/*.tar; do

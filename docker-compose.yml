@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.9'
 
 services:
 
@@ -12,6 +12,12 @@ services:
         - ./postgres/init-dump.sh:/docker-entrypoint-initdb.d/init-dump.sh
     ports:
       - "5432:5432"
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 10
+        start_period: 30s
     networks:
       - postgres
       
@@ -24,6 +30,9 @@ services:
     env_file: ./secrets/secrets_pgadmin.txt
     volumes:
         - ./pgadmin/servers.json:/pgadmin4/servers.json
+    depends_on:
+        postgres:
+            condition: service_healthy
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
@@ -35,6 +44,14 @@ services:
     image: mongo:latest
     restart: unless-stopped
     env_file: ./secrets/secrets_mongo.txt
+    healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongosh mongo:27017/local --quiet
+        interval: 5s
+        timeout: 5s
+        retries: 10
+        start_period: 30s
+    ports:
+      - 27017:27017
     networks:
       - postgres
 
@@ -43,6 +60,9 @@ services:
     image: mongo-express:latest
     restart: unless-stopped
     env_file: ./secrets/secrets_mongo-express.txt
+    depends_on:
+        mongo:
+            condition: service_healthy
     ports:
       - "${ME_CONFIG_MONGODB_PORT:-8081}:8081"
     networks:
@@ -54,6 +74,14 @@ services:
     build: ./python/.
     restart: unless-stopped
     image: pythonscript_container
+    volumes:
+    - ./python/src/transfer.py:/home/user/transfer.py
+    - ./python/src/database.ini:/home/user/database.ini
+    depends_on:
+        postgres:
+            condition: service_healthy
+        mongo:
+            condition: service_healthy
     networks:
       - postgres
     

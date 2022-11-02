@@ -1,4 +1,4 @@
-FROM python:latest
+FROM python:3.10
 RUN pip install --upgrade pip
 
 RUN useradd -m user

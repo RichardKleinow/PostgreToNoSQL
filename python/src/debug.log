@@ -1,0 +1,3 @@
+2022-11-02 21:10:35,541 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
+2022-11-02 21:10:35,543 [MainProcess] [root] [INFO] 15 tables found in database
+2022-11-02 21:10:35,731 [MainProcess] [root] [INFO] Transformation of 15 tables successful
