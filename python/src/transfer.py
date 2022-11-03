@@ -6,8 +6,9 @@ import sys
 import time
 from configparser import ConfigParser
 import psycopg2
-from pymongo import MongoClient
-
+import pymongo
+# Benchmarking
+from profilehooks import timecall
 
 class PGDB:
     """
@@ -39,7 +40,7 @@ class PGDB:
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
-    def list_tables(self):
+    def list_tables(self) -> None:
         sql = '''
         SELECT tablename from pg_catalog.pg_tables 
         WHERE schemaname != 'pg_catalog'
@@ -55,7 +56,7 @@ class PGDB:
         try:
             for table in self.listTables:
                 sql = f'''
-                SELECT json_agg({table}) FROM {table}
+                SELECT json_agg({table}.*) FROM {table}
                 '''
                 self.cursor.execute(sql)
                 json_table = self.cursor.fetchall()
@@ -72,26 +73,52 @@ class PGDB:
             return dict_json_tables
 
 
-
 class MDB:
     """
     Handler for Connection to Mongo-DB database
 
      Methods:
     -------
+    json_dict_insert
+        takes dict of json tables and import them as collections
     """
+
     def __init__(self, param: dict):
         try:
+            # Init for later usage
+            self.listCollections = []
             # Create Connection
-            self.client = MongoClient(**param)
+            self.client = pymongo.MongoClient(**param, serverSelectionTimeoutMS=5000)
+            # Clear potentially old and create new db
+            self.client.drop_database('dvdrental')
             self.db = self.client.dvdrental
+            # Check Connection
+            info = self.client.server_info()
+            logging.info(f'Mongo-DB Server version: {info.get("version")}')
 
-        except Exception as e:
+        except (Exception, pymongo.mongo_client.ServerSelectionTimeoutError) as e:
             logging.error(e.__class__)
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
+    def json_dict_insert(self, dicttables: dict) -> None:
+        try:
+            logging.info(f'Starting to insert {len(dicttables)} json elements into new database.')
+            for table in dicttables:
+                # Create Collection
+                collection = self.db[table]
+                collection: pymongo.collection.Collection
+                # Bulk insert the prepared json data
+                ids = collection.insert_many(dicttables.get(table))
+                # Save Collection
+                self.listCollections.append(collection)
+            logging.info(f'{len(self.listCollections)} tables were successfully inserted as collections.')
 
+        except:
+            logging.error(f'{sys.exc_info()[1]}')
+            logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
+
+@timecall
 def main():
     dictPgDB = read_config('database.ini', 'postgresql')
     PostgresDB = PGDB(dictPgDB)
@@ -100,6 +127,7 @@ def main():
 
     try:
         json_tables = PostgresDB.get_json_tables()
+        MongoDB.json_dict_insert(json_tables)
     except Exception as e:
         logging.error(e.__class__)
         logging.error(f'{sys.exc_info()[1]}')
