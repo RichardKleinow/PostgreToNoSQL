@@ -1,0 +1,14 @@
+2022-11-04 18:27:42,163 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
+2022-11-04 18:27:42,166 [MainProcess] [root] [INFO] 15 tables found in database
+2022-11-04 18:27:42,187 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
+2022-11-04 18:27:42,381 [MainProcess] [root] [INFO] Transformation of 15 tables successful
+2022-11-04 18:27:42,381 [MainProcess] [root] [INFO] ######### CREATE START ############################
+2022-11-04 18:27:42,381 [MainProcess] [root] [INFO] Starting to insert 15 json elements into new database.
+2022-11-04 18:27:42,381 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
+2022-11-04 18:27:43,732 [MainProcess] [root] [INFO] 15 tables were successfully inserted as collections.
+2022-11-04 18:27:43,732 [MainProcess] [root] [INFO] ######### READ START ############################
+2022-11-04 18:27:43,732 [MainProcess] [root] [INFO] --------Read Number of available films
+2022-11-04 18:27:43,733 [MainProcess] [root] [INFO] Transform Collection: film
+2022-11-04 18:27:43,733 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'film'}]
+2022-11-04 18:27:43,735 [MainProcess] [root] [INFO] Transformation returned:
+2022-11-04 18:27:43,735 [MainProcess] [root] [INFO] {'film': 1000}

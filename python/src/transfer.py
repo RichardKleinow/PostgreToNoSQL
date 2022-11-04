@@ -7,8 +7,10 @@ import time
 from configparser import ConfigParser
 import psycopg2
 import pymongo
+from pymongo import database
 # Benchmarking
 from profilehooks import timecall
+
 
 class PGDB:
     """
@@ -73,6 +75,12 @@ class PGDB:
             return dict_json_tables
 
 
+'''
+Query to count all available films
+'''
+count_films = [{'$count': "film"}]
+
+
 class MDB:
     """
     Handler for Connection to Mongo-DB database
@@ -104,6 +112,7 @@ class MDB:
     def json_dict_insert(self, dicttables: dict) -> None:
         try:
             logging.info(f'Starting to insert {len(dicttables)} json elements into new database.')
+            logging.info(f'Command used to insert: collection.insert_many(dicttables.get(table))')
             for table in dicttables:
                 # Create Collection
                 collection = self.db[table]
@@ -118,6 +127,35 @@ class MDB:
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
+    def create_view(self, name: str, viewon: str, pipeline: list) -> None:
+        try:
+            self.db: pymongo.database.Database
+            collection = self.db.create_collection(
+                name,
+                viewOn=viewon,
+                pipeline=pipeline)
+
+        except:
+            logging.error("Unable to Create customer_list view.")
+            logging.error(f'{sys.exc_info()[1]}')
+            logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
+
+    def tranform(self, collection: str, pipeline: list) -> None:
+        try:
+            logging.info(f'Transform Collection: {collection}')
+            logging.info(f'Pipeline used: {pipeline}')
+            if collection != '' and isinstance(pipeline, list):
+                result = self.db[collection].aggregate(pipeline)
+                logging.info(f'Transformation returned:')
+                for line in result:
+                    logging.info(f'{line}')
+
+        except:
+            logging.error("Unable to run query.")
+            logging.error(f'{sys.exc_info()[1]}')
+            logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
+
+
 @timecall
 def main():
     dictPgDB = read_config('database.ini', 'postgresql')
@@ -127,7 +165,14 @@ def main():
 
     try:
         json_tables = PostgresDB.get_json_tables()
+        logging.info(f'######### CREATE START ############################')
         MongoDB.json_dict_insert(json_tables)
+        logging.info(f'######### READ START ############################')
+        logging.info(f'--------Number of available films')
+        MongoDB.tranform('film', count_films)
+        logging.info(f'--------Number of films per location')
+
+        MongoDB.create_view('customer_list', 'customer', get_pipeline_customer_view())
     except Exception as e:
         logging.error(e.__class__)
         logging.error(f'{sys.exc_info()[1]}')
@@ -136,6 +181,79 @@ def main():
     finally:
         if PostgresDB.conn is not None:
             PostgresDB.conn.close()
+
+
+def get_pipeline_customer_view() -> list:
+    """
+        Returns the Pipeline to reproduce the behavior of view "customer_list"
+
+         Methods:
+        -------
+        1. Join Collection address by address_id
+        2. unwind address to get rid of internal lists
+        3. Join Collection city by city_id
+        4. unwind city to get rid of internal lists
+        5. Join Collection country by country_id
+        6. unwind country to get rid of internal lists
+        7. Concat first name and last name to a new field fullName
+        8. evaluate the field activebool and write active values to new field notes
+        9. Combine all necessary fields to view
+        """
+    return [{'$lookup': {
+        'from': "address",
+        'localField': "address_id",
+        'foreignField': "address_id",
+        'as': 'address'
+    }},
+        {'$unwind': {
+            'path': "$address",
+            'preserveNullAndEmptyArrays': True
+        }},
+
+        {'$lookup': {
+            'from': "city",
+            'localField': "address.city_id",
+            'foreignField': "city_id",
+            'as': "city"
+        }},
+        {'$unwind': {
+            'path': "$city",
+            'preserveNullAndEmptyArrays': True
+        }},
+
+        {'$lookup': {
+            'from': "country",
+            'localField': "city.country_id",
+            'foreignField': "country_id",
+            'as': "country"
+        }},
+        {'$unwind': {
+            'path': "$country",
+            'preserveNullAndEmptyArrays': True
+        }},
+
+        {'$addFields': {
+            'fullName': {'$concat': ['$first_name', ' ', '$last_name']}
+        }},
+
+        {'$addFields': {
+            'notes': {'$cond': {'if': "$activebool", 'then': "active", 'else': ""}}
+        }},
+
+        {'$project': {
+            '_id': 1,
+            'customer_id': 1,
+            'name': "$fullName",
+            'address': "$address.address",
+            'zip code': "$address.postal_code",
+            'phone': "$address.phone",
+            'city': "$city.city",
+            'country': "$country.country",
+            'notes': "$notes",
+            'sid': "$store_id"
+        }}
+
+    ]
 
 
 def read_config(filename='database.ini', section='postgresql') -> dict:
@@ -168,7 +286,7 @@ def init_logging():
         level=log_level,
         force=True,
         handlers=[
-            logging.FileHandler(filename=app_dir('debug.log'), mode='w', encoding='utf-8'),
+            logging.FileHandler(filename=app_dir('output.log'), mode='w', encoding='utf-8'),
             logging.StreamHandler(sys.stdout)
         ]
     )

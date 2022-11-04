@@ -55,16 +55,16 @@ services:
     networks:
       - postgres
 
-  mongo-express:
-    container_name: mongo-express_container
-    image: mongo-express:latest
+  mongo-client:
+    container_name: mongoclient_container
+    image: mongoclient/mongoclient
     restart: unless-stopped
-    env_file: ./secrets/secrets_mongo-express.txt
+    env_file: ./secrets/secrets_mongoclient.txt
     depends_on:
         mongo:
             condition: service_healthy
     ports:
-      - "${ME_CONFIG_MONGODB_PORT:-8081}:8081"
+     - "${PORT:-3000}:3000"
     networks:
       - postgres
       
