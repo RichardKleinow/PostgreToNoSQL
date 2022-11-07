@@ -144,7 +144,7 @@ find_revenue = [
     {'$project': {
         '_id': 0,
         'name': "$fullName",
-        'revenue': {'$round':["$count",2]},
+        'revenue': {'$round': ["$count", 2]},
         'staff_id': 1
     }}
 ]
@@ -235,14 +235,14 @@ find_big_spender = [
     {'$addFields': {
         'fullName': {'$concat': ["$customer.first_name", ' ', "$customer.last_name"]},
         'officeLocation': {'$concat': [
-            {'$cond': {'if': {'$eq':["$address.address", ""]}, 'then': "$address.address", 'else': "$address.address2"}},
-            ' ,',"$address.postal_code", ' ',"$city.city"]}
+            {'$cond': {'if': {'$eq': ["$address.address", ""]}, 'then': "$address.address", 'else': "$address.address2"}},
+            ' ,', "$address.postal_code", ' ', "$city.city"]}
     }},
     {'$project': {
         '_id': 0,
-        'fullName': 1,
-        'revenue': "$count",
-        'officeLocation':1
+        'Full Name': "$fullName",
+        'revenue':  {'$round': ["$count", 2]},
+        'Office Location': 'officeLocation'
     }}
 
 ]
