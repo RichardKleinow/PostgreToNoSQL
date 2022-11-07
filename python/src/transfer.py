@@ -75,10 +75,177 @@ class PGDB:
             return dict_json_tables
 
 
-'''
+"""
 Query to count all available films
-'''
+"""
 count_films = [{'$count': "film"}]
+"""
+Query to count films per location
+"""
+count_films_location = [{"$group": {'_id': "$store_id", 'count': {'$sum': 1}}},
+                        {"$project": {'_id': 0, 'store_id': "$_id", 'count': 1}}]
+"""
+Query to count 10 most used actors,
+full name,
+ascending order
+"""
+find_top_actors = [
+    {'$group': {
+        '_id': "$actor_id",
+        "count": {'$sum': 1},
+        "actor_id": {'$first': "$actor_id"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 10},
+    {'$lookup': {
+        'from': "actor",
+        'localField': "actor_id",
+        'foreignField': "actor_id",
+        'as': "actor"
+    }},
+    {'$unwind': {
+        'path': "$actor",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$addFields': {
+        'fullName': {'$concat': ["$actor.first_name", ' ', "$actor.last_name"]}
+    }},
+    {'$project': {
+        '_id': 0,
+        'name': "$fullName",
+        'count': "$count"
+    }}
+]
+
+"""
+Revenues per employees
+"""
+find_revenue = [
+    {'$group': {
+        '_id': "$staff_id",
+        "count": {'$sum': "$amount"},
+        "staff_id": {'$first': "$staff_id"}
+    }},
+    {'$lookup': {
+        'from': "staff",
+        'localField': "staff_id",
+        'foreignField': "staff_id",
+        'as': "staff"
+    }},
+    {'$unwind': {
+        'path': "$staff",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$addFields': {
+        'fullName': {'$concat': ["$staff.first_name", ' ', "$staff.last_name"]}
+    }},
+    {'$project': {
+        '_id': 0,
+        'name': "$fullName",
+        'revenue': {'$round':["$count",2]},
+        'staff_id': 1
+    }}
+]
+
+"""
+IDs of 10 customers with most rentals
+"""
+find_most_rentals = [
+    {'$group': {
+        '_id': "$customer_id",
+        "count": {'$sum': 1},
+        "customer_id": {'$first': "$customer_id"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 10},
+    {'$project': {
+        '_id': 0,
+        'customer_id': 1,
+        'count': "$count"
+    }}
+]
+
+"""
+Fullname, office location, 10 customer, most money spend
+"""
+find_big_spender = [
+    {'$group': {
+        '_id': "$customer_id",
+        "count": {'$sum': "$amount"},
+        "customer_id": {'$first': "$customer_id"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 10},
+    {'$lookup': {
+        'from': "customer",
+        'localField': "customer_id",
+        'foreignField': "customer_id",
+        'as': "customer"
+    }},
+    {'$unwind': {
+        'path': "$customer",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$lookup': {
+        'from': "customer",
+        'localField': "customer_id",
+        'foreignField': "customer_id",
+        'as': "customer"
+    }},
+    {'$unwind': {
+        'path': "$customer",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$lookup': {
+        'from': "store",
+        'localField': "customer.store_id",
+        'foreignField': "store_id",
+        'as': "store"
+    }},
+    {'$unwind': {
+        'path': "$store",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$lookup': {
+        'from': "address",
+        'localField': "store.address_id",
+        'foreignField': "address_id",
+        'as': "address"
+    }},
+    {'$unwind': {
+        'path': "$address",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$lookup': {
+        'from': "city",
+        'localField': "address.city_id",
+        'foreignField': "city_id",
+        'as': "city"
+    }},
+    {'$unwind': {
+        'path': "$city",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$addFields': {
+        'fullName': {'$concat': ["$customer.first_name", ' ', "$customer.last_name"]},
+        'officeLocation': {'$concat': [
+            {'$cond': {'if': {'$eq':["$address.address", ""]}, 'then': "$address.address", 'else': "$address.address2"}},
+            ' ,',"$address.postal_code", ' ',"$city.city"]}
+    }},
+    {'$project': {
+        '_id': 0,
+        'fullName': 1,
+        'revenue': "$count",
+        'officeLocation':1
+    }}
+
+]
 
 
 class MDB:
@@ -140,13 +307,13 @@ class MDB:
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
-    def tranform(self, collection: str, pipeline: list) -> None:
+    def aggregate(self, collection: str, pipeline: list) -> None:
         try:
-            logging.info(f'Transform Collection: {collection}')
             logging.info(f'Pipeline used: {pipeline}')
+            logging.info(f'Pipeline used on Collection: {collection}')
             if collection != '' and isinstance(pipeline, list):
                 result = self.db[collection].aggregate(pipeline)
-                logging.info(f'Transformation returned:')
+                logging.info(f'Aggregation returned:')
                 for line in result:
                     logging.info(f'{line}')
 
@@ -168,9 +335,24 @@ def main():
         logging.info(f'######### CREATE START ############################')
         MongoDB.json_dict_insert(json_tables)
         logging.info(f'######### READ START ############################')
-        logging.info(f'--------Number of available films')
-        MongoDB.tranform('film', count_films)
-        logging.info(f'--------Number of films per location')
+        logging.info(f'--------Number of available films--------')
+        MongoDB.aggregate('film', count_films)
+        logging.info("")
+        logging.info(f'--------Number of films per location--------')
+        MongoDB.aggregate('inventory', count_films_location)
+        logging.info("")
+        logging.info(f'--------Full name, 10 most used actors, sorted ascending --------')
+        MongoDB.aggregate('film_actor', find_top_actors)
+        logging.info("")
+        logging.info(f'--------Revenue per Employees --------')
+        MongoDB.aggregate('payment', find_revenue)
+        logging.info("")
+        logging.info(f'--------customer IDs, 10 most rentals --------')
+        MongoDB.aggregate('rental', find_most_rentals)
+        logging.info("")
+        logging.info(f'--------Fullname, office location, 10 customer, most money spend--------')
+        MongoDB.aggregate('payment', find_big_spender)
+        logging.info("")
 
         MongoDB.create_view('customer_list', 'customer', get_pipeline_customer_view())
     except Exception as e:
@@ -233,10 +415,7 @@ def get_pipeline_customer_view() -> list:
         }},
 
         {'$addFields': {
-            'fullName': {'$concat': ['$first_name', ' ', '$last_name']}
-        }},
-
-        {'$addFields': {
+            'fullName': {'$concat': ['$first_name', ' ', '$last_name']},
             'notes': {'$cond': {'if': "$activebool", 'then': "active", 'else': ""}}
         }},
 
