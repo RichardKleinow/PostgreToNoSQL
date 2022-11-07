@@ -1,74 +1,42 @@
-2022-11-07 14:54:57,567 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
-2022-11-07 14:54:57,569 [MainProcess] [root] [INFO] 15 tables found in database
-2022-11-07 14:54:57,592 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
-2022-11-07 14:54:57,783 [MainProcess] [root] [INFO] Transformation of 15 tables successful
-2022-11-07 14:54:57,783 [MainProcess] [root] [INFO] ######### CREATE START ############################
-2022-11-07 14:54:57,783 [MainProcess] [root] [INFO] Starting to insert 15 json elements into new database.
-2022-11-07 14:54:57,783 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
-2022-11-07 14:54:59,020 [MainProcess] [root] [INFO] 15 tables were successfully inserted as collections.
-2022-11-07 14:54:59,020 [MainProcess] [root] [INFO] ######### READ START ############################
-2022-11-07 14:54:59,020 [MainProcess] [root] [INFO] --------Number of available films--------
-2022-11-07 14:54:59,020 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'film'}]
-2022-11-07 14:54:59,020 [MainProcess] [root] [INFO] Pipeline used on Collection: film
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] {'film': 1000}
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] 
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] --------Number of films per location--------
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
-2022-11-07 14:54:59,023 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] {'count': 2270, 'store_id': 1}
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] {'count': 2311, 'store_id': 2}
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] 
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted ascending --------
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
-2022-11-07 14:54:59,027 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Gina Degeneres', 'count': 42}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Walter Torn', 'count': 41}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Mary Keitel', 'count': 40}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Matthew Carrey', 'count': 39}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Sandra Kilmer', 'count': 37}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Scarlett Damon', 'count': 36}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Val Bolger', 'count': 35}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Uma Wood', 'count': 35}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Groucho Dunst', 'count': 35}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] {'name': 'Vivien Basinger', 'count': 35}
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] 
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] --------Revenue per Employees --------
-2022-11-07 14:54:59,034 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
-2022-11-07 14:54:59,035 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] {'staff_id': 1, 'name': 'Mike Hillyer', 'revenue': 30252.12}
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] {'staff_id': 2, 'name': 'Jon Stephens', 'revenue': 31059.92}
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] 
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
-2022-11-07 14:54:59,047 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 148, 'count': 46}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 526, 'count': 45}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 144, 'count': 42}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 236, 'count': 42}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 75, 'count': 41}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 469, 'count': 40}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 197, 'count': 40}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 178, 'count': 39}
-2022-11-07 14:54:59,061 [MainProcess] [root] [INFO] {'customer_id': 137, 'count': 39}
-2022-11-07 14:54:59,062 [MainProcess] [root] [INFO] {'customer_id': 468, 'count': 39}
-2022-11-07 14:54:59,062 [MainProcess] [root] [INFO] 
-2022-11-07 14:54:59,062 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spend--------
-2022-11-07 14:54:59,062 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$eq': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'fullName': 1, 'revenue': '$count', 'officeLocation': 1}}]
-2022-11-07 14:54:59,062 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Eleanor Hunt', 'officeLocation': None, 'revenue': 211.55}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Karl Seal', 'officeLocation': None, 'revenue': 208.58}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Marion Snyder', 'officeLocation': None, 'revenue': 194.61}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Rhonda Kennedy', 'officeLocation': None, 'revenue': 191.62}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Clara Shaw', 'officeLocation': None, 'revenue': 189.6}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Tommy Collazo', 'officeLocation': None, 'revenue': 183.63}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Ana Bradley', 'officeLocation': None, 'revenue': 167.67000000000002}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Curtis Irby', 'officeLocation': None, 'revenue': 167.62}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Marcia Dean', 'officeLocation': None, 'revenue': 166.61}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] {'fullName': 'Mike Way', 'officeLocation': None, 'revenue': 162.67000000000002}
-2022-11-07 14:54:59,085 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:33,956 [MainProcess] [root] [ERROR] connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "dvdrental" does not exist
+
+2022-11-07 16:12:33,957 [MainProcess] [root] [ERROR] connection to server at "localhost" (::1), port 5432 failed: FATAL:  database "dvdrental" does not exist
+
+2022-11-07 16:12:33,957 [MainProcess] [root] [ERROR] Error on line 32
+2022-11-07 16:12:34,090 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
+2022-11-07 16:12:34,090 [MainProcess] [root] [INFO] Transformation of 0 tables successful
+2022-11-07 16:12:34,091 [MainProcess] [root] [INFO] ######### CREATE START ############################
+2022-11-07 16:12:34,091 [MainProcess] [root] [INFO] Starting to insert 0 json elements into new database.
+2022-11-07 16:12:34,091 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
+2022-11-07 16:12:34,091 [MainProcess] [root] [INFO] 0 tables were successfully inserted as collections.
+2022-11-07 16:12:34,092 [MainProcess] [root] [INFO] ######### READ START ############################
+2022-11-07 16:12:34,092 [MainProcess] [root] [INFO] --------Number of available films--------
+2022-11-07 16:12:34,092 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'film'}]
+2022-11-07 16:12:34,092 [MainProcess] [root] [INFO] Pipeline used on Collection: film
+2022-11-07 16:12:34,095 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,095 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:34,096 [MainProcess] [root] [INFO] --------Number of films per location--------
+2022-11-07 16:12:34,096 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
+2022-11-07 16:12:34,096 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
+2022-11-07 16:12:34,100 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,101 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:34,101 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted ascending --------
+2022-11-07 16:12:34,101 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
+2022-11-07 16:12:34,102 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
+2022-11-07 16:12:34,105 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,105 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:34,106 [MainProcess] [root] [INFO] --------Revenue per Employees --------
+2022-11-07 16:12:34,106 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
+2022-11-07 16:12:34,106 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2022-11-07 16:12:34,108 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,108 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:34,108 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
+2022-11-07 16:12:34,109 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
+2022-11-07 16:12:34,109 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2022-11-07 16:12:34,111 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,111 [MainProcess] [root] [INFO] 
+2022-11-07 16:12:34,111 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spend--------
+2022-11-07 16:12:34,111 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$eq': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'fullName': 1, 'revenue': '$count', 'officeLocation': 1}}]
+2022-11-07 16:12:34,112 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2022-11-07 16:12:34,114 [MainProcess] [root] [INFO] Aggregation returned:
+2022-11-07 16:12:34,114 [MainProcess] [root] [INFO] 

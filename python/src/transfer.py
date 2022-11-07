@@ -361,8 +361,9 @@ def main():
         logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
     finally:
-        if PostgresDB.conn is not None:
-            PostgresDB.conn.close()
+        if hasattr(PostgresDB, 'conn'):
+            if PostgresDB.conn is not None:
+                PostgresDB.conn.close()
 
 
 def get_pipeline_customer_view() -> list:
