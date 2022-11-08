@@ -235,16 +235,99 @@ find_big_spender = [
     {'$addFields': {
         'fullName': {'$concat': ["$customer.first_name", ' ', "$customer.last_name"]},
         'officeLocation': {'$concat': [
-            {'$cond': {'if': {'$eq': ["$address.address", ""]}, 'then': "$address.address", 'else': "$address.address2"}},
+            {'$cond': {'if': {'$gte': ["$address.address", ""]}, 'then': "$address.address", 'else': "$address.address2"}},
             ' ,', "$address.postal_code", ' ', "$city.city"]}
     }},
     {'$project': {
         '_id': 0,
-        'Full Name': "$fullName",
+        'name': "$fullName",
         'revenue':  {'$round': ["$count", 2]},
-        'Office Location': 'officeLocation'
+        'office location': '$officeLocation'
     }}
+]
 
+"""
+titles
+10 most viewed films
+sorted descending
+"""
+find_popular_titles = [
+    {'$group': {
+        '_id': "$inventory_id",
+        "count": {'$sum': 1},
+        "inventory_id": {'$first': "$inventory_id"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 10},
+    {'$lookup': {
+        'from': "inventory",
+        'localField': "inventory_id",
+        'foreignField': "inventory_id",
+        'as': "inventory"
+    }},
+    {'$unwind': {
+        'path': "$inventory",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$lookup': {
+        'from': "film",
+        'localField': "inventory.film_id",
+        'foreignField': "film_id",
+        'as': "film"
+    }},
+    {'$unwind': {
+        'path': "$film",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$project': {
+        '_id': 0,
+        'title': "$film.title",
+        'view numbers': "$count"
+    }}
+]
+
+"""
+top 3 film category's
+"""
+find_popular_category = [
+    {'$lookup': {
+        'from': "inventory",
+        'localField': "inventory_id",
+        'foreignField': "inventory_id",
+        'as': "inventory"
+    }},
+    {'$lookup': {
+        'from': "film_category",
+        'localField': "inventory.film_id",
+        'foreignField': "film_id",
+        'as': "film_category"
+    }},
+    {'$lookup': {
+        'from': "category",
+        'localField': "film_category.category_id",
+        'foreignField': "category_id",
+        'as': "category"
+    }},
+    {'$unwind': {
+        'path': "$category",
+        'preserveNullAndEmptyArrays': True
+    }},
+    {'$group': {
+        '_id': "$film_category.category_id",
+        "count": {'$sum': 1},
+        "name": {'$first': "$category.name"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 3},
+    {'$project': {
+        '_id': 0,
+        'category': "$name",
+        'view numbers': "$count"
+    }}
 ]
 
 
@@ -296,6 +379,8 @@ class MDB:
 
     def create_view(self, name: str, viewon: str, pipeline: list) -> None:
         try:
+            logging.info(f'Pipeline used: {pipeline}')
+            logging.info(f'View on Collection: {viewon}')
             self.db: pymongo.database.Database
             collection = self.db.create_collection(
                 name,
@@ -341,7 +426,7 @@ def main():
         logging.info(f'--------Number of films per location--------')
         MongoDB.aggregate('inventory', count_films_location)
         logging.info("")
-        logging.info(f'--------Full name, 10 most used actors, sorted ascending --------')
+        logging.info(f'--------Full name, 10 most used actors, sorted descending --------')
         MongoDB.aggregate('film_actor', find_top_actors)
         logging.info("")
         logging.info(f'--------Revenue per Employees --------')
@@ -353,8 +438,19 @@ def main():
         logging.info(f'--------Fullname, office location, 10 customer, most money spend--------')
         MongoDB.aggregate('payment', find_big_spender)
         logging.info("")
-
+        logging.info(f'--------titles 10 most viewed films, sorted descending--------')
+        MongoDB.aggregate('rental', find_popular_titles)
+        logging.info("")
+        logging.info(f'--------Top 3 film categorys--------')
+        MongoDB.aggregate('rental', find_popular_category)
+        logging.info("")
+        logging.info(f'--------Create View customer_list--------')
         MongoDB.create_view('customer_list', 'customer', get_pipeline_customer_view())
+        logging.info("View successfully created.")
+        logging.info("")
+        logging.info(f'######### READ END ############################')
+        logging.info(f'######### UPDATE START ############################')
+
     except Exception as e:
         logging.error(e.__class__)
         logging.error(f'{sys.exc_info()[1]}')
