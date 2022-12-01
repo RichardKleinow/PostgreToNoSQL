@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 # Python 3.10
+import datetime
+import hashlib
 import logging
 import os
 import sys
@@ -450,6 +452,41 @@ def main():
         logging.info("")
         logging.info(f'######### READ END ############################')
         logging.info(f'######### UPDATE START ############################')
+        staff = MongoDB.db['staff'].aggregate([])
+        for employee in staff:
+            logging.info(f"Updating password for {employee['first_name']} {employee['last_name']}")
+            new_password = hashlib.md5(b"%.30f" % time.time_ns()).hexdigest()
+            MongoDB.db['staff'].update_one({'staff_id': employee['staff_id']}, {'$set': {'password': new_password, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}})
+        logging.info(f"Creating address")
+        MongoDB.db['address'].insert_one({'address_id': 6969, 'address': '69 Mongo Drive', 'district': 'Alberta', 'city_id': 300, 'postal_code': '', 'phone': '', 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()})
+        logging.info(f"Creating store")
+        MongoDB.db['store'].insert_one({'store_id': 69, 'manager_staff_id': 1, 'address_id': 6969, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()})
+        logging.info(f"Moving inventory")
+        MongoDB.db['inventory'].update_many({}, {'$set': {'store_id': 69, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}})
+        logging.info(f'######### UPDATE END ############################')
+        logging.info(f'######### DELETE START ############################')
+        inventory = MongoDB.db['inventory'].aggregate([
+            {'$lookup':{
+                'localField': 'film_id',
+                'from': 'film',
+                'foreignField': 'film_id',
+                'as': 'film'
+                }},
+            {'$match': {
+                'film.length': {'$lt': 60}
+            }}
+        ])
+        for item in inventory:
+            rents = MongoDB.db['rental'].aggregate([{'$match':{'inventory_id':item['inventory_id']}}])
+            for rent in rents:
+                MongoDB.db['payment'].delete_many({'rental_id': rent['rental_id']})
+            MongoDB.db['rental'].delete_many({'inventory_id': item['inventory_id']})
+            MongoDB.db['inventory'].delete_many({'inventory_id': item['inventory_id']})
+            MongoDB.db['film'].delete_many({'film_id': item['film_id']})
+        # now deleting films that were never in inventory
+        MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
+        logging.info(f'######### DELETE END ############################')
+
 
     except Exception as e:
         logging.error(e.__class__)
