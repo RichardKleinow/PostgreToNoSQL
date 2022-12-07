@@ -1,104 +1,86 @@
-2022-11-08 12:10:07,296 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
-2022-11-08 12:10:07,298 [MainProcess] [root] [INFO] 15 tables found in database
-2022-11-08 12:10:07,324 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
-2022-11-08 12:10:07,491 [MainProcess] [root] [INFO] Transformation of 15 tables successful
-2022-11-08 12:10:07,492 [MainProcess] [root] [INFO] ######### CREATE START ############################
-2022-11-08 12:10:07,492 [MainProcess] [root] [INFO] Starting to insert 15 json elements into new database.
-2022-11-08 12:10:07,492 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
-2022-11-08 12:10:08,144 [MainProcess] [root] [INFO] 15 tables were successfully inserted as collections.
-2022-11-08 12:10:08,144 [MainProcess] [root] [INFO] ######### READ START ############################
-2022-11-08 12:10:08,144 [MainProcess] [root] [INFO] --------Number of available films--------
-2022-11-08 12:10:08,144 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'film'}]
-2022-11-08 12:10:08,144 [MainProcess] [root] [INFO] Pipeline used on Collection: film
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] {'film': 1000}
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] --------Number of films per location--------
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
-2022-11-08 12:10:08,146 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
-2022-11-08 12:10:08,149 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,149 [MainProcess] [root] [INFO] {'count': 2270, 'store_id': 1}
-2022-11-08 12:10:08,149 [MainProcess] [root] [INFO] {'count': 2311, 'store_id': 2}
-2022-11-08 12:10:08,150 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,150 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted descending --------
-2022-11-08 12:10:08,150 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
-2022-11-08 12:10:08,150 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Gina Degeneres', 'count': 42}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Walter Torn', 'count': 41}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Mary Keitel', 'count': 40}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Matthew Carrey', 'count': 39}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Sandra Kilmer', 'count': 37}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Scarlett Damon', 'count': 36}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Angela Witherspoon', 'count': 35}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Groucho Dunst', 'count': 35}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Vivien Basinger', 'count': 35}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] {'name': 'Uma Wood', 'count': 35}
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] --------Revenue per Employees --------
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
-2022-11-08 12:10:08,158 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] {'staff_id': 1, 'name': 'Mike Hillyer', 'revenue': 30252.12}
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] {'staff_id': 2, 'name': 'Jon Stephens', 'revenue': 31059.92}
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
-2022-11-08 12:10:08,170 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 148, 'count': 46}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 526, 'count': 45}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 144, 'count': 42}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 236, 'count': 42}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 75, 'count': 41}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 469, 'count': 40}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 197, 'count': 40}
-2022-11-08 12:10:08,180 [MainProcess] [root] [INFO] {'customer_id': 468, 'count': 39}
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] {'customer_id': 137, 'count': 39}
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] {'customer_id': 178, 'count': 39}
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spend--------
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$gte': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'office location': '$officeLocation'}}]
-2022-11-08 12:10:08,181 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Eleanor Hunt', 'revenue': 211.55, 'office location': '47 MySakila Drive , Lethbridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Karl Seal', 'revenue': 208.58, 'office location': '28 MySQL Boulevard , Woodridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Marion Snyder', 'revenue': 194.61, 'office location': '28 MySQL Boulevard , Woodridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Rhonda Kennedy', 'revenue': 191.62, 'office location': '28 MySQL Boulevard , Woodridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Clara Shaw', 'revenue': 189.6, 'office location': '47 MySakila Drive , Lethbridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Tommy Collazo', 'revenue': 183.63, 'office location': '47 MySakila Drive , Lethbridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Ana Bradley', 'revenue': 167.67, 'office location': '28 MySQL Boulevard , Woodridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Curtis Irby', 'revenue': 167.62, 'office location': '28 MySQL Boulevard , Woodridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Marcia Dean', 'revenue': 166.61, 'office location': '47 MySakila Drive , Lethbridge'}
-2022-11-08 12:10:08,201 [MainProcess] [root] [INFO] {'name': 'Mike Way', 'revenue': 162.67, 'office location': '47 MySakila Drive , Lethbridge'}
-2022-11-08 12:10:08,202 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,202 [MainProcess] [root] [INFO] --------titles 10 most viewed films, sorted descending--------
-2022-11-08 12:10:08,202 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$inventory_id', 'count': {'$sum': 1}, 'inventory_id': {'$first': '$inventory_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$unwind': {'path': '$inventory', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'film', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film'}}, {'$unwind': {'path': '$film', 'preserveNullAndEmptyArrays': True}}, {'$project': {'_id': 0, 'title': '$film.title', 'view numbers': '$count'}}]
-2022-11-08 12:10:08,202 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2022-11-08 12:10:08,244 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Scarface Bang', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Sleepy Japanese', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Muscle Bright', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Fool Mockingbird', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Song Hedwig', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Potter Connecticut', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Intrigue Worst', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Doctor Grail', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Silence Kane', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] {'title': 'Fantasy Troopers', 'view numbers': 5}
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] --------Top 3 film categorys--------
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$lookup': {'from': 'film_category', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film_category'}}, {'$lookup': {'from': 'category', 'localField': 'film_category.category_id', 'foreignField': 'category_id', 'as': 'category'}}, {'$unwind': {'path': '$category', 'preserveNullAndEmptyArrays': True}}, {'$group': {'_id': '$film_category.category_id', 'count': {'$sum': 1}, 'name': {'$first': '$category.name'}}}, {'$sort': {'count': -1}}, {'$limit': 3}, {'$project': {'_id': 0, 'category': '$name', 'view numbers': '$count'}}]
-2022-11-08 12:10:08,245 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] Aggregation returned:
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] {'category': 'Sports', 'view numbers': 1179}
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] {'category': 'Animation', 'view numbers': 1166}
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] {'category': 'Action', 'view numbers': 1112}
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] --------Create View customer_list--------
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'address', 'localField': 'address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'country', 'localField': 'city.country_id', 'foreignField': 'country_id', 'as': 'country'}}, {'$unwind': {'path': '$country', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$first_name', ' ', '$last_name']}, 'notes': {'$cond': {'if': '$activebool', 'then': 'active', 'else': ''}}}}, {'$project': {'_id': 1, 'customer_id': 1, 'name': '$fullName', 'address': '$address.address', 'zip code': '$address.postal_code', 'phone': '$address.phone', 'city': '$city.city', 'country': '$country.country', 'notes': '$notes', 'sid': '$store_id'}}]
-2022-11-08 12:10:08,823 [MainProcess] [root] [INFO] View on Collection: customer
-2022-11-08 12:10:08,843 [MainProcess] [root] [INFO] View successfully created.
-2022-11-08 12:10:08,843 [MainProcess] [root] [INFO] 
-2022-11-08 12:10:08,843 [MainProcess] [root] [INFO] ######### READ END ############################
-2022-11-08 12:10:08,843 [MainProcess] [root] [INFO] ######### UPDATE START ############################
+2022-11-10 15:41:56,923 [MainProcess] [root] [ERROR] connection to server at "localhost" (::1), port 5432 failed: Connection refused (0x0000274D/10061)
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused (0x0000274D/10061)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2022-11-10 15:41:56,924 [MainProcess] [root] [ERROR] connection to server at "localhost" (::1), port 5432 failed: Connection refused (0x0000274D/10061)
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused (0x0000274D/10061)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2022-11-10 15:41:56,924 [MainProcess] [root] [ERROR] Error on line 32
+2022-11-10 15:42:01,955 [MainProcess] [root] [ERROR] <class 'pymongo.errors.ServerSelectionTimeoutError'>
+2022-11-10 15:42:01,956 [MainProcess] [root] [ERROR] localhost:27017: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte, Timeout: 5.0s, Topology Description: <TopologyDescription id: 636d0db42df013604a6cdef2, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] Es konnte keine Verbindung hergestellt werden, da der Zielcomputer die Verbindung verweigerte')>]>
+2022-11-10 15:42:01,956 [MainProcess] [root] [ERROR] Error on line 351
+2022-11-10 15:42:01,957 [MainProcess] [root] [INFO] Transformation of 0 tables successful
+2022-11-10 15:42:01,957 [MainProcess] [root] [INFO] ######### CREATE START ############################
+2022-11-10 15:42:01,957 [MainProcess] [root] [INFO] Starting to insert 0 json elements into new database.
+2022-11-10 15:42:01,957 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
+2022-11-10 15:42:01,958 [MainProcess] [root] [INFO] 0 tables were successfully inserted as collections.
+2022-11-10 15:42:01,958 [MainProcess] [root] [INFO] ######### READ START ############################
+2022-11-10 15:42:01,958 [MainProcess] [root] [INFO] --------Number of available films--------
+2022-11-10 15:42:01,958 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'film'}]
+2022-11-10 15:42:01,958 [MainProcess] [root] [INFO] Pipeline used on Collection: film
+2022-11-10 15:42:01,959 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,959 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,959 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,959 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,960 [MainProcess] [root] [INFO] --------Number of films per location--------
+2022-11-10 15:42:01,960 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
+2022-11-10 15:42:01,960 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
+2022-11-10 15:42:01,960 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,960 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,960 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,960 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,960 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted descending --------
+2022-11-10 15:42:01,961 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
+2022-11-10 15:42:01,961 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
+2022-11-10 15:42:01,961 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,961 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,962 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,962 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,962 [MainProcess] [root] [INFO] --------Revenue per Employees --------
+2022-11-10 15:42:01,962 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
+2022-11-10 15:42:01,962 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2022-11-10 15:42:01,962 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,962 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,962 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2022-11-10 15:42:01,963 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,963 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,963 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spend--------
+2022-11-10 15:42:01,963 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$gte': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'office location': '$officeLocation'}}]
+2022-11-10 15:42:01,964 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2022-11-10 15:42:01,964 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,964 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,964 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,964 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,964 [MainProcess] [root] [INFO] --------titles 10 most viewed films, sorted descending--------
+2022-11-10 15:42:01,964 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$inventory_id', 'count': {'$sum': 1}, 'inventory_id': {'$first': '$inventory_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$unwind': {'path': '$inventory', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'film', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film'}}, {'$unwind': {'path': '$film', 'preserveNullAndEmptyArrays': True}}, {'$project': {'_id': 0, 'title': '$film.title', 'view numbers': '$count'}}]
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] --------Top 3 film categorys--------
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$lookup': {'from': 'film_category', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film_category'}}, {'$lookup': {'from': 'category', 'localField': 'film_category.category_id', 'foreignField': 'category_id', 'as': 'category'}}, {'$unwind': {'path': '$category', 'preserveNullAndEmptyArrays': True}}, {'$group': {'_id': '$film_category.category_id', 'count': {'$sum': 1}, 'name': {'$first': '$category.name'}}}, {'$sort': {'count': -1}}, {'$limit': 3}, {'$project': {'_id': 0, 'category': '$name', 'view numbers': '$count'}}]
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] Unable to run query.
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,965 [MainProcess] [root] [ERROR] Error on line 400
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,965 [MainProcess] [root] [INFO] --------Create View customer_list--------
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'address', 'localField': 'address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'country', 'localField': 'city.country_id', 'foreignField': 'country_id', 'as': 'country'}}, {'$unwind': {'path': '$country', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$first_name', ' ', '$last_name']}, 'notes': {'$cond': {'if': '$activebool', 'then': 'active', 'else': ''}}}}, {'$project': {'_id': 1, 'customer_id': 1, 'name': '$fullName', 'address': '$address.address', 'zip code': '$address.postal_code', 'phone': '$address.phone', 'city': '$city.city', 'country': '$country.country', 'notes': '$notes', 'sid': '$store_id'}}]
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] View on Collection: customer
+2022-11-10 15:42:01,966 [MainProcess] [root] [ERROR] Unable to Create customer_list view.
+2022-11-10 15:42:01,966 [MainProcess] [root] [ERROR] 'MDB' object has no attribute 'db'
+2022-11-10 15:42:01,966 [MainProcess] [root] [ERROR] Error on line 385
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] View successfully created.
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] 
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] ######### READ END ############################
+2022-11-10 15:42:01,966 [MainProcess] [root] [INFO] ######### UPDATE START ############################
