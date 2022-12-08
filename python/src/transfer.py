@@ -85,7 +85,8 @@ count_films = [{'$count': "film"}]
 """
 Query to count films per location
 """
-count_films_location = [{"$group": {'_id': "$store_id", 'count': {'$sum': 1}}},
+count_films_location = [{'$group': {'_id': {'store_id': '$store_id', 'film_id': '$film_id'}}},
+                        {'$group': {'_id': '$_id.store_id', 'count': {'$sum': 1}}},
                         {"$project": {'_id': 0, 'store_id': "$_id", 'count': 1}}]
 """
 Query to count 10 most used actors,
@@ -333,6 +334,28 @@ find_popular_category = [
     }}
 ]
 
+'''
+find short films
+'''
+short_films = [
+    {'$lookup': {
+        'localField': 'film_id',
+        'from': 'film',
+        'foreignField': 'film_id',
+        'as': 'film'
+    }},
+    {'$match': {
+        'film.length': {'$lt': 60}
+    }}
+]
+
+'''
+create new address
+'''
+new_addr = {'address_id': 6969, 'address': '69 Mongo Drive',
+            'district': 'Alberta', 'city_id': 300, 'postal_code': '',
+            'phone': '', 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat().split('.')[0]}
+
 
 class MDB:
     """
@@ -456,40 +479,28 @@ def main():
         logging.info(f'--------New save PW for all customers--------')
         staff = MongoDB.db['staff'].aggregate([])
         for employee in staff:
-            logging.info(f"Updating password for {employee['first_name']} {employee['last_name']}")
             new_password = hashlib.md5(b"%.30f" % time.time_ns()).hexdigest()
-            MongoDB.db['staff'].update_one({'staff_id': employee['staff_id']}, {'$set': {'password': new_password, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}})
+            MongoDB.db['staff'].update_one({'staff_id': employee['staff_id']}, {'$set': {'password': new_password, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat().split('.')[0]}})
+            logging.info(f"Password-Hash for {employee['first_name']} {employee['last_name']} updated to {new_password}")
         logging.info("")
         logging.info(f'--------Create new address--------')
-        new_addr = {'address_id': 6969, 'address': '69 Mongo Drive', 'district': 'Alberta', 'city_id': 300, 'postal_code': '', 'phone': '', 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}
         MongoDB.db['address'].insert_one(new_addr)
-        logging.info("new address created: " + json.dumps(new_addr))
+        logging.info(f'new address created successfully: {new_addr}')
         logging.info("")
         logging.info(f'--------Creating store--------')
-        new_store = {'store_id': 69, 'manager_staff_id': 1, 'address_id': 6969, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}
+        new_store = {'store_id': 69, 'manager_staff_id': 1, 'address_id': 6969, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat().split('.')[0]}
         MongoDB.db['store'].insert_one(new_store)
-        logging.info("new store created: " + json.dumps(new_store))
+        logging.info(f'new store created successfully: {new_store}')
         logging.info("")
         logging.info(f'--------Moving inventory--------')
-        store_setter = {'$set': {'store_id': 69, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat()}}
+        store_setter = {'$set': {'store_id': 69, 'last_update': datetime.datetime.now(datetime.timezone.utc).isoformat().split('.')[0]}}
         MongoDB.db['inventory'].update_many({}, store_setter)
-        logging.info("Store moved with command: " + json.dumps(store_setter))
+        logging.info(f'Store moved with command: {store_setter}')
         logging.info("")
         logging.info(f'######### UPDATE END ############################')
         logging.info(f'######### DELETE START ############################')
         logging.info(f'--------Delete short films--------')
-        short_films =  [
-            {'$lookup': {
-                'localField': 'film_id',
-                'from': 'film',
-                'foreignField': 'film_id',
-                'as': 'film'
-            }},
-            {'$match': {
-                'film.length': {'$lt': 60}
-            }}
-        ]
-        inventory = MongoDB.db['inventory'].aggregate(short_films)
+        inventory = list(MongoDB.db['inventory'].aggregate(short_films))
         logging.info(f"Selected short films with aggregation: {short_films}")
         for item in inventory:
             rents = MongoDB.db['rental'].aggregate([{'$match': {'inventory_id': item['inventory_id']}}])
@@ -498,15 +509,20 @@ def main():
             MongoDB.db['rental'].delete_many({'inventory_id': item['inventory_id']})
             MongoDB.db['inventory'].delete_many({'inventory_id': item['inventory_id']})
             MongoDB.db['film'].delete_many({'film_id': item['film_id']})
-            logging.info(f'Film-ID {item["film_id"]} successfully deleted.')
+        logging.info(f'{len(inventory)} short films deleted successfully.')
         logging.info("")
         # now deleting films that were never in inventory
         logging.info(f'--------Delete short film rentals--------')
         MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
-        logging.info("Successfully deleted.")
+        logging.info("Successfully deleted films unter 60mins length.")
         logging.info("")
         logging.info(f'######### DELETE END ############################')
-
+        logging.info("  __ _       _     _              _")
+        logging.info("/ _(_)     (_)   | |            | |")
+        logging.info("| |_ _ _ __  _ ___| |__   ___  __| |")
+        logging.info("|  _| | '_ \| / __| '_ \ / _ \/ _` |")
+        logging.info("| | | | | | | \__ \ | | |  __/ (_| |")
+        logging.info("|_| |_|_| |_|_|___/_| |_|\___|\__,_|")
 
     except Exception as e:
         logging.error(e.__class__)
