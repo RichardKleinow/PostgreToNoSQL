@@ -256,28 +256,28 @@ titles
 sorted descending
 """
 find_popular_titles = [
-    {'$group': {
-        '_id': "$inventory_id",
-        "count": {'$sum': 1},
-        "inventory_id": {'$first': "$inventory_id"}
-    }},
-    {'$sort': {
-        "count": -1
-    }},
-    {'$limit': 10},
     {'$lookup': {
         'from': "inventory",
         'localField': "inventory_id",
         'foreignField': "inventory_id",
         'as': "inventory"
     }},
+    {'$group': {
+        '_id': "$inventory.film_id",
+        "count": {'$sum': 1},
+        "film_id": {'$first': "$inventory.film_id"}
+    }},
+    {'$sort': {
+        "count": -1
+    }},
+    {'$limit': 10},
     {'$unwind': {
         'path': "$inventory",
         'preserveNullAndEmptyArrays': True
     }},
     {'$lookup': {
         'from': "film",
-        'localField': "inventory.film_id",
+        'localField': "film_id",
         'foreignField': "film_id",
         'as': "film"
     }},
@@ -418,6 +418,7 @@ class MDB:
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
+    @timecall
     def aggregate(self, collection: str, pipeline: list) -> None:
         try:
             logging.info(f'Pipeline used: {pipeline}')
