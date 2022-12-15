@@ -81,7 +81,7 @@ class PGDB:
 """
 Query to count all available films
 """
-count_films = [{'$count': "film"}]
+count_films = [{'$count': "inventory_id"}]
 """
 Query to count films per location
 """
@@ -448,7 +448,7 @@ def main():
         MongoDB.json_dict_insert(json_tables)
         logging.info(f'######### READ START ############################')
         logging.info(f'--------Number of available films--------')
-        MongoDB.aggregate('film', count_films)
+        MongoDB.aggregate('inventory', count_films)
         logging.info("")
         logging.info(f'--------Number of films per location--------')
         MongoDB.aggregate('inventory', count_films_location)
@@ -474,6 +474,9 @@ def main():
         logging.info(f'--------Create View customer_list--------')
         MongoDB.create_view('customer_list', 'customer', get_pipeline_customer_view())
         logging.info("View successfully created.")
+        logging.info("")
+        logging.info(f'--------Sample the created view--------')
+        MongoDB.aggregate("customer_list", [{'$sort': {"_id": 1}},{'$limit': 10}])
         logging.info("")
         logging.info(f'######### READ END ############################')
         logging.info(f'######### UPDATE START ############################')
