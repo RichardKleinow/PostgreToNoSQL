@@ -73,11 +73,12 @@ services:
   python:
     container_name: python_container
     build: ./python/.
-    restart: unless-stopped
+    restart: on-failure
     image: pythonscript_container
     volumes:
     - ./python/src/transfer.py:/home/user/transfer.py
     - ./python/src/database.ini:/home/user/database.ini
+    - ./python/src/output.log:/home/user/output.log
     depends_on:
         postgres:
             condition: service_healthy

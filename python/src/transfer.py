@@ -418,7 +418,6 @@ class MDB:
             logging.error(f'{sys.exc_info()[1]}')
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
-    @timecall
     def aggregate(self, collection: str, pipeline: list) -> None:
         try:
             logging.info(f'Pipeline used: {pipeline}')
@@ -503,23 +502,26 @@ def main():
         logging.info("")
         logging.info(f'######### UPDATE END ############################')
         logging.info(f'######### DELETE START ############################')
-        logging.info(f'--------Delete short films--------')
+        logging.info(f'--------Delete short films + rentals--------')
         inventory = list(MongoDB.db['inventory'].aggregate(short_films))
         logging.info(f"Selected short films with aggregation: {short_films}")
+        rental_cnt = 0
         for item in inventory:
-            rents = MongoDB.db['rental'].aggregate([{'$match': {'inventory_id': item['inventory_id']}}])
+            rents = list(MongoDB.db['rental'].aggregate([{'$match': {'inventory_id': item['inventory_id']}}]))
             for rent in rents:
                 MongoDB.db['payment'].delete_many({'rental_id': rent['rental_id']})
             MongoDB.db['rental'].delete_many({'inventory_id': item['inventory_id']})
             MongoDB.db['inventory'].delete_many({'inventory_id': item['inventory_id']})
             MongoDB.db['film'].delete_many({'film_id': item['film_id']})
-        logging.info(f'{len(inventory)} short films deleted successfully.')
+            rental_cnt += len(rents)
+        logging.info(f'{len(inventory)} short films deleted successfully from inventory.')
+        logging.info(f'{rental_cnt} corresponding rental entries were deleted as well.')
         logging.info("")
         # now deleting films that were never in inventory
-        logging.info(f'--------Delete short film rentals--------')
+        logging.info(f'--------Delete remaining short films--------')
         del_result = MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
         if hasattr(del_result,"deleted_count"):
-            logging.info(f"Successfully deleted {del_result.deleted_count} rental entries for films unter 60mins length.")
+            logging.info(f"Successfully deleted {del_result.deleted_count} rental entries for films unter 60mins length that were never in inventory.")
         logging.info("")
         logging.info(f'######### DELETE END ############################')
         logging.info("  __ _       _     _              _")
