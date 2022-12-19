@@ -517,8 +517,9 @@ def main():
         logging.info("")
         # now deleting films that were never in inventory
         logging.info(f'--------Delete short film rentals--------')
-        MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
-        logging.info("Successfully deleted films unter 60mins length.")
+        del_result = MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
+        if hasattr(del_result,"deleted_count"):
+            logging.info(f"Successfully deleted {del_result.deleted_count} rental entries for films unter 60mins length.")
         logging.info("")
         logging.info(f'######### DELETE END ############################')
         logging.info("  __ _       _     _              _")

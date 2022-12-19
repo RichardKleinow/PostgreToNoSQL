@@ -1,4 +1,5 @@
 # PostgreToNoSQL
+**The resulting file with all the CRUD information will be found in [.\python\src\output.log](.\\python\\src\\output.log)**
 
 ## Source
 - PostgreSQL with unpacked data from whatever *.tar is put into /postgres
@@ -9,7 +10,7 @@
 - NoSQL Client Frontend
 
 ## Middleware
-python:latest
+python:3.10
 Requirements in /python/requirements.txt
 Script in /python/src
 
