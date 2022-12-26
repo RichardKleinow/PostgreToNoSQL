@@ -174,7 +174,7 @@ find_most_rentals = [
 ]
 
 """
-Fullname, office location, 10 customer, most money spend
+Fullname, office location, 10 customer, most money spent
 """
 find_big_spender = [
     {'$group': {
@@ -293,7 +293,7 @@ find_popular_titles = [
 ]
 
 """
-top 3 film category's
+top 3 film categories
 """
 find_popular_category = [
     {'$lookup': {
@@ -364,7 +364,7 @@ class MDB:
      Methods:
     -------
     json_dict_insert
-        takes dict of json tables and import them as collections
+        takes dict of json tables and imports them as collections
     """
 
     def __init__(self, param: dict):
@@ -461,13 +461,13 @@ def main():
         logging.info(f'--------customer IDs, 10 most rentals --------')
         MongoDB.aggregate('rental', find_most_rentals)
         logging.info("")
-        logging.info(f'--------Fullname, office location, 10 customer, most money spend--------')
+        logging.info(f'--------Fullname, office location, 10 customer, most money spent--------')
         MongoDB.aggregate('payment', find_big_spender)
         logging.info("")
         logging.info(f'--------titles 10 most viewed films, sorted descending--------')
         MongoDB.aggregate('rental', find_popular_titles)
         logging.info("")
-        logging.info(f'--------Top 3 film categorys--------')
+        logging.info(f'--------Top 3 film categories--------')
         MongoDB.aggregate('rental', find_popular_category)
         logging.info("")
         logging.info(f'--------Create View customer_list--------')
@@ -479,7 +479,7 @@ def main():
         logging.info("")
         logging.info(f'######### READ END ############################')
         logging.info(f'######### UPDATE START ############################')
-        logging.info(f'--------New save PW for all customers--------')
+        logging.info(f'--------New safe password for all customers--------')
         staff = MongoDB.db['staff'].aggregate([])
         for employee in staff:
             new_password = hashlib.md5(b"%.30f" % time.time_ns()).hexdigest()
@@ -521,7 +521,7 @@ def main():
         logging.info(f'--------Delete remaining short films--------')
         del_result = MongoDB.db['film'].delete_many({'length': {'$lt': 60}})
         if hasattr(del_result,"deleted_count"):
-            logging.info(f"Successfully deleted {del_result.deleted_count} rental entries for films unter 60mins length that were never in inventory.")
+            logging.info(f"Successfully deleted {del_result.deleted_count} rental entries for films under 60mins length that were never in inventory.")
         logging.info("")
         logging.info(f'######### DELETE END ############################')
         logging.info("  __ _       _     _              _")
