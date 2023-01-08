@@ -12,8 +12,12 @@ import psycopg2
 import pymongo
 from pymongo import database
 # Benchmarking
-from profilehooks import timecall
-
+#from profilehooks import timecall
+# Optimisation (https://softwaretester.info/python-profiling-with-pycharm-community-edition/)
+# install cprofilev
+# install snakeviz
+# Run Programm with Interpreter Option -B -m cProfile -o profile.prof
+# snakeviz profile.prof
 
 class PGDB:
     """
@@ -434,7 +438,6 @@ class MDB:
             logging.error(f'Error on line {sys.exc_info()[-1].tb_lineno}')
 
 
-@timecall
 def main():
     dictPgDB = read_config('database.ini', 'postgresql')
     PostgresDB = PGDB(dictPgDB)
