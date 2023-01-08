@@ -1,137 +1,151 @@
-2023-01-08 17:29:43,186 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
-2023-01-08 17:29:43,188 [MainProcess] [root] [INFO] 15 tables found in database
-2023-01-08 17:29:43,257 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
-2023-01-08 17:29:43,438 [MainProcess] [root] [INFO] Transformation of 15 tables successful
-2023-01-08 17:29:43,438 [MainProcess] [root] [INFO] ######### CREATE START ############################
-2023-01-08 17:29:43,439 [MainProcess] [root] [INFO] Starting to insert 15 json elements into new database.
-2023-01-08 17:29:43,439 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
-2023-01-08 17:29:45,239 [MainProcess] [root] [INFO] 15 tables were successfully inserted as collections.
-2023-01-08 17:29:45,239 [MainProcess] [root] [INFO] ######### READ START ############################
-2023-01-08 17:29:45,239 [MainProcess] [root] [INFO] --------Number of available films--------
-2023-01-08 17:29:45,239 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'inventory_id'}]
-2023-01-08 17:29:45,239 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] {'inventory_id': 4581}
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] --------Number of films per location--------
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': {'store_id': '$store_id', 'film_id': '$film_id'}}}, {'$group': {'_id': '$_id.store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
-2023-01-08 17:29:45,244 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] {'count': 759, 'store_id': 1}
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] {'count': 762, 'store_id': 2}
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted descending --------
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
-2023-01-08 17:29:45,250 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
-2023-01-08 17:29:45,257 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,257 [MainProcess] [root] [INFO] {'name': 'Gina Degeneres', 'count': 42}
-2023-01-08 17:29:45,257 [MainProcess] [root] [INFO] {'name': 'Walter Torn', 'count': 41}
-2023-01-08 17:29:45,257 [MainProcess] [root] [INFO] {'name': 'Mary Keitel', 'count': 40}
-2023-01-08 17:29:45,257 [MainProcess] [root] [INFO] {'name': 'Matthew Carrey', 'count': 39}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Sandra Kilmer', 'count': 37}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Scarlett Damon', 'count': 36}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Henry Berry', 'count': 35}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Uma Wood', 'count': 35}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Vivien Basinger', 'count': 35}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] {'name': 'Groucho Dunst', 'count': 35}
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] --------Revenue per Employees --------
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
-2023-01-08 17:29:45,258 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2023-01-08 17:29:45,269 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] {'staff_id': 2, 'name': 'Jon Stephens', 'revenue': 31059.92}
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] {'staff_id': 1, 'name': 'Mike Hillyer', 'revenue': 30252.12}
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
-2023-01-08 17:29:45,270 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 148, 'count': 46}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 526, 'count': 45}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 236, 'count': 42}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 144, 'count': 42}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 75, 'count': 41}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 197, 'count': 40}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 469, 'count': 40}
-2023-01-08 17:29:45,285 [MainProcess] [root] [INFO] {'customer_id': 137, 'count': 39}
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] {'customer_id': 178, 'count': 39}
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] {'customer_id': 468, 'count': 39}
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spent--------
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$gte': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'office location': '$officeLocation'}}]
-2023-01-08 17:29:45,286 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
-2023-01-08 17:29:45,309 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Eleanor Hunt', 'revenue': 211.55, 'office location': '47 MySakila Drive , Lethbridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Karl Seal', 'revenue': 208.58, 'office location': '28 MySQL Boulevard , Woodridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Marion Snyder', 'revenue': 194.61, 'office location': '28 MySQL Boulevard , Woodridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Rhonda Kennedy', 'revenue': 191.62, 'office location': '28 MySQL Boulevard , Woodridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Clara Shaw', 'revenue': 189.6, 'office location': '47 MySakila Drive , Lethbridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Tommy Collazo', 'revenue': 183.63, 'office location': '47 MySakila Drive , Lethbridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Ana Bradley', 'revenue': 167.67, 'office location': '28 MySQL Boulevard , Woodridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Curtis Irby', 'revenue': 167.62, 'office location': '28 MySQL Boulevard , Woodridge'}
-2023-01-08 17:29:45,310 [MainProcess] [root] [INFO] {'name': 'Marcia Dean', 'revenue': 166.61, 'office location': '47 MySakila Drive , Lethbridge'}
-2023-01-08 17:29:45,311 [MainProcess] [root] [INFO] {'name': 'Mike Way', 'revenue': 162.67, 'office location': '47 MySakila Drive , Lethbridge'}
-2023-01-08 17:29:45,311 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,311 [MainProcess] [root] [INFO] --------titles 10 most viewed films, sorted descending--------
-2023-01-08 17:29:45,311 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$group': {'_id': '$inventory.film_id', 'count': {'$sum': 1}, 'film_id': {'$first': '$inventory.film_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$unwind': {'path': '$inventory', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'film', 'localField': 'film_id', 'foreignField': 'film_id', 'as': 'film'}}, {'$unwind': {'path': '$film', 'preserveNullAndEmptyArrays': True}}, {'$project': {'_id': 0, 'title': '$film.title', 'view numbers': '$count'}}]
-2023-01-08 17:29:45,311 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Bucket Brotherhood', 'view numbers': 34}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Rocketeer Mother', 'view numbers': 33}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Scalawag Duck', 'view numbers': 32}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Juggler Hardly', 'view numbers': 32}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Grit Clockwork', 'view numbers': 32}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Forward Temple', 'view numbers': 32}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Ridgemont Submarine', 'view numbers': 32}
-2023-01-08 17:29:45,365 [MainProcess] [root] [INFO] {'title': 'Robbers Joon', 'view numbers': 31}
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] {'title': 'Goodfellas Salute', 'view numbers': 31}
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] {'title': 'Wife Turn', 'view numbers': 31}
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] --------Top 3 film categories--------
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$lookup': {'from': 'film_category', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film_category'}}, {'$lookup': {'from': 'category', 'localField': 'film_category.category_id', 'foreignField': 'category_id', 'as': 'category'}}, {'$unwind': {'path': '$category', 'preserveNullAndEmptyArrays': True}}, {'$group': {'_id': '$film_category.category_id', 'count': {'$sum': 1}, 'name': {'$first': '$category.name'}}}, {'$sort': {'count': -1}}, {'$limit': 3}, {'$project': {'_id': 0, 'category': '$name', 'view numbers': '$count'}}]
-2023-01-08 17:29:45,366 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
-2023-01-08 17:29:45,940 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:45,940 [MainProcess] [root] [INFO] {'category': 'Sports', 'view numbers': 1179}
-2023-01-08 17:29:45,940 [MainProcess] [root] [INFO] {'category': 'Animation', 'view numbers': 1166}
-2023-01-08 17:29:45,940 [MainProcess] [root] [INFO] {'category': 'Action', 'view numbers': 1112}
-2023-01-08 17:29:45,941 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,941 [MainProcess] [root] [INFO] --------Create View customer_list--------
-2023-01-08 17:29:45,941 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'address', 'localField': 'address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'country', 'localField': 'city.country_id', 'foreignField': 'country_id', 'as': 'country'}}, {'$unwind': {'path': '$country', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$first_name', ' ', '$last_name']}, 'notes': {'$cond': {'if': '$activebool', 'then': 'active', 'else': ''}}}}, {'$project': {'_id': 1, 'customer_id': 1, 'name': '$fullName', 'address': '$address.address', 'zip code': '$address.postal_code', 'phone': '$address.phone', 'city': '$city.city', 'country': '$country.country', 'notes': '$notes', 'sid': '$store_id'}}]
-2023-01-08 17:29:45,941 [MainProcess] [root] [INFO] View on Collection: customer
-2023-01-08 17:29:45,969 [MainProcess] [root] [INFO] View successfully created.
-2023-01-08 17:29:45,969 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:45,969 [MainProcess] [root] [INFO] --------Sample the created view--------
-2023-01-08 17:29:45,970 [MainProcess] [root] [INFO] Pipeline used: [{'$sort': {'_id': 1}}, {'$limit': 10}]
-2023-01-08 17:29:45,970 [MainProcess] [root] [INFO] Pipeline used on Collection: customer_list
-2023-01-08 17:29:46,316 [MainProcess] [root] [INFO] Aggregation returned:
-2023-01-08 17:29:46,316 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775a'), 'customer_id': 524, 'name': 'Jared Ely', 'address': '1003 Qinhuangdao Street', 'zip code': '25972', 'phone': '35533115997', 'city': 'Purwakarta', 'country': 'Indonesia', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,316 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775b'), 'customer_id': 1, 'name': 'Mary Smith', 'address': '1913 Hanoi Way', 'zip code': '35200', 'phone': '28303384290', 'city': 'Sasebo', 'country': 'Japan', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,316 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775c'), 'customer_id': 2, 'name': 'Patricia Johnson', 'address': '1121 Loja Avenue', 'zip code': '17886', 'phone': '838635286649', 'city': 'San Bernardino', 'country': 'United States', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775d'), 'customer_id': 3, 'name': 'Linda Williams', 'address': '692 Joliet Street', 'zip code': '83579', 'phone': '448477190408', 'city': 'Athenai', 'country': 'Greece', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775e'), 'customer_id': 4, 'name': 'Barbara Jones', 'address': '1566 Inegl Manor', 'zip code': '53561', 'phone': '705814003527', 'city': 'Myingyan', 'country': 'Myanmar', 'notes': 'active', 'sid': 2}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f775f'), 'customer_id': 5, 'name': 'Elizabeth Brown', 'address': '53 Idfu Parkway', 'zip code': '42399', 'phone': '10655648674', 'city': 'Nantou', 'country': 'Taiwan', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f7760'), 'customer_id': 6, 'name': 'Jennifer Davis', 'address': '1795 Santiago de Compostela Way', 'zip code': '18743', 'phone': '860452626434', 'city': 'Laredo', 'country': 'United States', 'notes': 'active', 'sid': 2}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f7761'), 'customer_id': 7, 'name': 'Maria Miller', 'address': '900 Santiago de Compostela Parkway', 'zip code': '93896', 'phone': '716571220373', 'city': 'Kragujevac', 'country': 'Yugoslavia', 'notes': 'active', 'sid': 1}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f7762'), 'customer_id': 8, 'name': 'Susan Wilson', 'address': '478 Joliet Way', 'zip code': '77948', 'phone': '657282285970', 'city': 'Hamilton', 'country': 'New Zealand', 'notes': 'active', 'sid': 2}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] {'_id': ObjectId('63baef7704afecfce72f7763'), 'customer_id': 9, 'name': 'Margaret Moore', 'address': '613 Korolev Drive', 'zip code': '45844', 'phone': '380657522649', 'city': 'Masqat', 'country': 'Oman', 'notes': 'active', 'sid': 2}
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] ######### READ END ############################
-2023-01-08 17:29:46,317 [MainProcess] [root] [INFO] ######### UPDATE START ############################
-2023-01-08 17:29:46,318 [MainProcess] [root] [INFO] --------New safe password for all customers--------
-2023-01-08 17:29:46,322 [MainProcess] [root] [INFO] Password-Hash for Mike Hillyer updated to f91b45d6cf518563375f71bd7006396c
-2023-01-08 17:29:46,323 [MainProcess] [root] [INFO] Password-Hash for Jon Stephens updated to d7f22cfda5664521ac64f8e52c5eeb2d
-2023-01-08 17:29:46,323 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:46,323 [MainProcess] [root] [INFO] --------Create new address--------
-2023-01-08 17:29:46,325 [MainProcess] [root] [INFO] new address created successfully: {'address_id': 6969, 'address': '69 Mongo Drive', 'district': 'Alberta', 'city_id': 300, 'postal_code': '', 'phone': '', 'last_update': '2023-01-08T16:29:43', '_id': ObjectId('63baef7a04afecfce7302074')}
-2023-01-08 17:29:46,325 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:46,326 [MainProcess] [root] [INFO] --------Creating store--------
-2023-01-08 17:29:46,327 [MainProcess] [root] [INFO] new store created successfully: {'store_id': 69, 'manager_staff_id': 1, 'address_id': 6969, 'last_update': '2023-01-08T16:29:46', '_id': ObjectId('63baef7a04afecfce7302075')}
-2023-01-08 17:29:46,327 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:46,327 [MainProcess] [root] [INFO] --------Moving inventory--------
-2023-01-08 17:29:46,361 [MainProcess] [root] [INFO] Store moved with command: {'$set': {'store_id': 69, 'last_update': '2023-01-08T16:29:46'}}
-2023-01-08 17:29:46,362 [MainProcess] [root] [INFO] 
-2023-01-08 17:29:46,362 [MainProcess] [root] [INFO] ######### UPDATE END ############################
-2023-01-08 17:29:46,362 [MainProcess] [root] [INFO] ######### DELETE START ############################
-2023-01-08 17:29:46,362 [MainProcess] [root] [INFO] --------Delete short films + rentals--------
-2023-01-08 17:34:27,309 [MainProcess] [root] [INFO] Selected short films with aggregation: [{'$lookup': {'localField': 'film_id', 'from': 'film', 'foreignField': 'film_id', 'as': 'film'}}, {'$match': {'film.length': {'$lt': 60}}}]
-2023-01-08 17:42:20,160 [MainProcess] [root] [INFO] |_| |_|_| |_|_|___/_| |_|\___|\__,_|
+2023-01-08 18:34:19,369 [MainProcess] [root] [INFO] PostgresVersion: ('PostgreSQL 15.0 (Debian 15.0-1.pgdg110+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 10.2.1-6) 10.2.1 20210110, 64-bit',)
+2023-01-08 18:34:19,372 [MainProcess] [root] [INFO] 15 tables found in database
+2023-01-08 18:34:19,413 [MainProcess] [root] [INFO] Mongo-DB Server version: 6.0.2
+2023-01-08 18:34:19,620 [MainProcess] [root] [INFO] Transformation of 15 tables successful
+2023-01-08 18:34:19,621 [MainProcess] [root] [INFO] ######### CREATE START ############################
+2023-01-08 18:34:19,621 [MainProcess] [root] [INFO] Starting to insert 15 json elements into new database.
+2023-01-08 18:34:19,621 [MainProcess] [root] [INFO] Command used to insert: collection.insert_many(dicttables.get(table))
+2023-01-08 18:34:21,153 [MainProcess] [root] [INFO] 15 tables were successfully inserted as collections.
+2023-01-08 18:34:21,153 [MainProcess] [root] [INFO] ######### READ START ############################
+2023-01-08 18:34:21,153 [MainProcess] [root] [INFO] --------Number of available films--------
+2023-01-08 18:34:21,153 [MainProcess] [root] [INFO] Pipeline used: [{'$count': 'inventory_id'}]
+2023-01-08 18:34:21,153 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
+2023-01-08 18:34:21,156 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,156 [MainProcess] [root] [INFO] {'inventory_id': 4581}
+2023-01-08 18:34:21,156 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,156 [MainProcess] [root] [INFO] --------Number of films per location--------
+2023-01-08 18:34:21,156 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': {'store_id': '$store_id', 'film_id': '$film_id'}}}, {'$group': {'_id': '$_id.store_id', 'count': {'$sum': 1}}}, {'$project': {'_id': 0, 'store_id': '$_id', 'count': 1}}]
+2023-01-08 18:34:21,157 [MainProcess] [root] [INFO] Pipeline used on Collection: inventory
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] {'count': 759, 'store_id': 1}
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] {'count': 762, 'store_id': 2}
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] --------Full name, 10 most used actors, sorted descending --------
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$actor_id', 'count': {'$sum': 1}, 'actor_id': {'$first': '$actor_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'actor', 'localField': 'actor_id', 'foreignField': 'actor_id', 'as': 'actor'}}, {'$unwind': {'path': '$actor', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$actor.first_name', ' ', '$actor.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'count': '$count'}}]
+2023-01-08 18:34:21,162 [MainProcess] [root] [INFO] Pipeline used on Collection: film_actor
+2023-01-08 18:34:21,168 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Gina Degeneres', 'count': 42}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Walter Torn', 'count': 41}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Mary Keitel', 'count': 40}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Matthew Carrey', 'count': 39}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Sandra Kilmer', 'count': 37}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Scarlett Damon', 'count': 36}
+2023-01-08 18:34:21,169 [MainProcess] [root] [INFO] {'name': 'Angela Witherspoon', 'count': 35}
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] {'name': 'Groucho Dunst', 'count': 35}
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] {'name': 'Henry Berry', 'count': 35}
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] {'name': 'Vivien Basinger', 'count': 35}
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] --------Revenue per Employees --------
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$staff_id', 'count': {'$sum': '$amount'}, 'staff_id': {'$first': '$staff_id'}}}, {'$lookup': {'from': 'staff', 'localField': 'staff_id', 'foreignField': 'staff_id', 'as': 'staff'}}, {'$unwind': {'path': '$staff', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$staff.first_name', ' ', '$staff.last_name']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'staff_id': 1}}]
+2023-01-08 18:34:21,170 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2023-01-08 18:34:21,180 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,180 [MainProcess] [root] [INFO] {'staff_id': 2, 'name': 'Jon Stephens', 'revenue': 31059.92}
+2023-01-08 18:34:21,181 [MainProcess] [root] [INFO] {'staff_id': 1, 'name': 'Mike Hillyer', 'revenue': 30252.12}
+2023-01-08 18:34:21,181 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,181 [MainProcess] [root] [INFO] --------customer IDs, 10 most rentals --------
+2023-01-08 18:34:21,181 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': 1}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$project': {'_id': 0, 'customer_id': 1, 'count': '$count'}}]
+2023-01-08 18:34:21,181 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 148, 'count': 46}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 526, 'count': 45}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 144, 'count': 42}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 236, 'count': 42}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 75, 'count': 41}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 197, 'count': 40}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 469, 'count': 40}
+2023-01-08 18:34:21,194 [MainProcess] [root] [INFO] {'customer_id': 137, 'count': 39}
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] {'customer_id': 178, 'count': 39}
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] {'customer_id': 468, 'count': 39}
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] --------Fullname, office location, 10 customer, most money spent--------
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] Pipeline used: [{'$group': {'_id': '$customer_id', 'count': {'$sum': '$amount'}, 'customer_id': {'$first': '$customer_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'customer', 'localField': 'customer_id', 'foreignField': 'customer_id', 'as': 'customer'}}, {'$unwind': {'path': '$customer', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'store', 'localField': 'customer.store_id', 'foreignField': 'store_id', 'as': 'store'}}, {'$unwind': {'path': '$store', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'address', 'localField': 'store.address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$customer.first_name', ' ', '$customer.last_name']}, 'officeLocation': {'$concat': [{'$cond': {'if': {'$gte': ['$address.address', '']}, 'then': '$address.address', 'else': '$address.address2'}}, ' ,', '$address.postal_code', ' ', '$city.city']}}}, {'$project': {'_id': 0, 'name': '$fullName', 'revenue': {'$round': ['$count', 2]}, 'office location': '$officeLocation'}}]
+2023-01-08 18:34:21,195 [MainProcess] [root] [INFO] Pipeline used on Collection: payment
+2023-01-08 18:34:21,217 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Eleanor Hunt', 'revenue': 211.55, 'office location': '47 MySakila Drive , Lethbridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Karl Seal', 'revenue': 208.58, 'office location': '28 MySQL Boulevard , Woodridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Marion Snyder', 'revenue': 194.61, 'office location': '28 MySQL Boulevard , Woodridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Rhonda Kennedy', 'revenue': 191.62, 'office location': '28 MySQL Boulevard , Woodridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Clara Shaw', 'revenue': 189.6, 'office location': '47 MySakila Drive , Lethbridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Tommy Collazo', 'revenue': 183.63, 'office location': '47 MySakila Drive , Lethbridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Ana Bradley', 'revenue': 167.67, 'office location': '28 MySQL Boulevard , Woodridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Curtis Irby', 'revenue': 167.62, 'office location': '28 MySQL Boulevard , Woodridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Marcia Dean', 'revenue': 166.61, 'office location': '47 MySakila Drive , Lethbridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] {'name': 'Mike Way', 'revenue': 162.67, 'office location': '47 MySakila Drive , Lethbridge'}
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] --------titles 10 most viewed films, sorted descending--------
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$group': {'_id': '$inventory.film_id', 'count': {'$sum': 1}, 'film_id': {'$first': '$inventory.film_id'}}}, {'$sort': {'count': -1}}, {'$limit': 10}, {'$unwind': {'path': '$inventory', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'film', 'localField': 'film_id', 'foreignField': 'film_id', 'as': 'film'}}, {'$unwind': {'path': '$film', 'preserveNullAndEmptyArrays': True}}, {'$project': {'_id': 0, 'title': '$film.title', 'view numbers': '$count'}}]
+2023-01-08 18:34:21,218 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Bucket Brotherhood', 'view numbers': 34}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Rocketeer Mother', 'view numbers': 33}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Grit Clockwork', 'view numbers': 32}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Juggler Hardly', 'view numbers': 32}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Ridgemont Submarine', 'view numbers': 32}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Scalawag Duck', 'view numbers': 32}
+2023-01-08 18:34:21,269 [MainProcess] [root] [INFO] {'title': 'Forward Temple', 'view numbers': 32}
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] {'title': 'Goodfellas Salute', 'view numbers': 31}
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] {'title': 'Timberland Sky', 'view numbers': 31}
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] {'title': 'Apache Divine', 'view numbers': 31}
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] --------Top 3 film categories--------
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'inventory', 'localField': 'inventory_id', 'foreignField': 'inventory_id', 'as': 'inventory'}}, {'$lookup': {'from': 'film_category', 'localField': 'inventory.film_id', 'foreignField': 'film_id', 'as': 'film_category'}}, {'$lookup': {'from': 'category', 'localField': 'film_category.category_id', 'foreignField': 'category_id', 'as': 'category'}}, {'$unwind': {'path': '$category', 'preserveNullAndEmptyArrays': True}}, {'$group': {'_id': '$film_category.category_id', 'count': {'$sum': 1}, 'name': {'$first': '$category.name'}}}, {'$sort': {'count': -1}}, {'$limit': 3}, {'$project': {'_id': 0, 'category': '$name', 'view numbers': '$count'}}]
+2023-01-08 18:34:21,270 [MainProcess] [root] [INFO] Pipeline used on Collection: rental
+2023-01-08 18:34:21,837 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] {'category': 'Sports', 'view numbers': 1179}
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] {'category': 'Animation', 'view numbers': 1166}
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] {'category': 'Action', 'view numbers': 1112}
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] --------Create View customer_list--------
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] Pipeline used: [{'$lookup': {'from': 'address', 'localField': 'address_id', 'foreignField': 'address_id', 'as': 'address'}}, {'$unwind': {'path': '$address', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'city', 'localField': 'address.city_id', 'foreignField': 'city_id', 'as': 'city'}}, {'$unwind': {'path': '$city', 'preserveNullAndEmptyArrays': True}}, {'$lookup': {'from': 'country', 'localField': 'city.country_id', 'foreignField': 'country_id', 'as': 'country'}}, {'$unwind': {'path': '$country', 'preserveNullAndEmptyArrays': True}}, {'$addFields': {'fullName': {'$concat': ['$first_name', ' ', '$last_name']}, 'notes': {'$cond': {'if': '$activebool', 'then': 'active', 'else': ''}}}}, {'$project': {'_id': 1, 'customer_id': 1, 'name': '$fullName', 'address': '$address.address', 'zip code': '$address.postal_code', 'phone': '$address.phone', 'city': '$city.city', 'country': '$country.country', 'notes': '$notes', 'sid': '$store_id'}}]
+2023-01-08 18:34:21,838 [MainProcess] [root] [INFO] View on Collection: customer
+2023-01-08 18:34:21,890 [MainProcess] [root] [INFO] View successfully created.
+2023-01-08 18:34:21,890 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:21,890 [MainProcess] [root] [INFO] --------Sample the created view--------
+2023-01-08 18:34:21,890 [MainProcess] [root] [INFO] Pipeline used: [{'$sort': {'_id': 1}}, {'$limit': 10}]
+2023-01-08 18:34:21,890 [MainProcess] [root] [INFO] Pipeline used on Collection: customer_list
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] Aggregation returned:
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3de7'), 'customer_id': 524, 'name': 'Jared Ely', 'address': '1003 Qinhuangdao Street', 'zip code': '25972', 'phone': '35533115997', 'city': 'Purwakarta', 'country': 'Indonesia', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3de8'), 'customer_id': 1, 'name': 'Mary Smith', 'address': '1913 Hanoi Way', 'zip code': '35200', 'phone': '28303384290', 'city': 'Sasebo', 'country': 'Japan', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3de9'), 'customer_id': 2, 'name': 'Patricia Johnson', 'address': '1121 Loja Avenue', 'zip code': '17886', 'phone': '838635286649', 'city': 'San Bernardino', 'country': 'United States', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3dea'), 'customer_id': 3, 'name': 'Linda Williams', 'address': '692 Joliet Street', 'zip code': '83579', 'phone': '448477190408', 'city': 'Athenai', 'country': 'Greece', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3deb'), 'customer_id': 4, 'name': 'Barbara Jones', 'address': '1566 Inegl Manor', 'zip code': '53561', 'phone': '705814003527', 'city': 'Myingyan', 'country': 'Myanmar', 'notes': 'active', 'sid': 2}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3dec'), 'customer_id': 5, 'name': 'Elizabeth Brown', 'address': '53 Idfu Parkway', 'zip code': '42399', 'phone': '10655648674', 'city': 'Nantou', 'country': 'Taiwan', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3ded'), 'customer_id': 6, 'name': 'Jennifer Davis', 'address': '1795 Santiago de Compostela Way', 'zip code': '18743', 'phone': '860452626434', 'city': 'Laredo', 'country': 'United States', 'notes': 'active', 'sid': 2}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3dee'), 'customer_id': 7, 'name': 'Maria Miller', 'address': '900 Santiago de Compostela Parkway', 'zip code': '93896', 'phone': '716571220373', 'city': 'Kragujevac', 'country': 'Yugoslavia', 'notes': 'active', 'sid': 1}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3def'), 'customer_id': 8, 'name': 'Susan Wilson', 'address': '478 Joliet Way', 'zip code': '77948', 'phone': '657282285970', 'city': 'Hamilton', 'country': 'New Zealand', 'notes': 'active', 'sid': 2}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] {'_id': ObjectId('63bafe9c9fd99aae625b3df0'), 'customer_id': 9, 'name': 'Margaret Moore', 'address': '613 Korolev Drive', 'zip code': '45844', 'phone': '380657522649', 'city': 'Masqat', 'country': 'Oman', 'notes': 'active', 'sid': 2}
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] ######### READ END ############################
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] ######### UPDATE START ############################
+2023-01-08 18:34:22,248 [MainProcess] [root] [INFO] --------New safe password for all customers--------
+2023-01-08 18:34:22,252 [MainProcess] [root] [INFO] Password-Hash for Mike Hillyer updated to e1f2f1d30896e206e670052524251c05
+2023-01-08 18:34:22,253 [MainProcess] [root] [INFO] Password-Hash for Jon Stephens updated to ee4ddea5eee54b99e237d144f0cfe750
+2023-01-08 18:34:22,254 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,254 [MainProcess] [root] [INFO] --------Create new address--------
+2023-01-08 18:34:22,255 [MainProcess] [root] [INFO] new address created successfully: {'address_id': 6969, 'address': '69 Mongo Drive', 'district': 'Alberta', 'city_id': 300, 'postal_code': '', 'phone': '', 'last_update': '2023-01-08T17:34:19', '_id': ObjectId('63bafe9e9fd99aae625be701')}
+2023-01-08 18:34:22,255 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,255 [MainProcess] [root] [INFO] --------Creating store--------
+2023-01-08 18:34:22,256 [MainProcess] [root] [INFO] new store created successfully: {'store_id': 69, 'manager_staff_id': 1, 'address_id': 6969, 'last_update': '2023-01-08T17:34:22', '_id': ObjectId('63bafe9e9fd99aae625be702')}
+2023-01-08 18:34:22,256 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,256 [MainProcess] [root] [INFO] --------Moving inventory--------
+2023-01-08 18:34:22,291 [MainProcess] [root] [INFO] Store moved with command: {'$set': {'store_id': 69, 'last_update': '2023-01-08T17:34:22'}}
+2023-01-08 18:34:22,291 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,291 [MainProcess] [root] [INFO] ######### UPDATE END ############################
+2023-01-08 18:34:22,291 [MainProcess] [root] [INFO] ######### DELETE START ############################
+2023-01-08 18:34:22,291 [MainProcess] [root] [INFO] --------Delete short films + rentals--------
+2023-01-08 18:34:22,319 [MainProcess] [root] [INFO] Selected short films with aggregation: [{'$lookup': {'localField': 'film_id', 'from': 'film', 'foreignField': 'film_id', 'as': 'film'}}, {'$match': {'film.length': {'$lt': 60}}}]
+2023-01-08 18:34:22,400 [MainProcess] [root] [INFO] 1386 short film entrys deleted successfully from payments.
+2023-01-08 18:34:22,401 [MainProcess] [root] [INFO] 1531 short film entrys deleted successfully from rental.
+2023-01-08 18:34:22,401 [MainProcess] [root] [INFO] 436 short films deleted successfully from inventory.
+2023-01-08 18:34:22,401 [MainProcess] [root] [INFO] 91 short films deleted from film database.
+2023-01-08 18:34:22,401 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,401 [MainProcess] [root] [INFO] --------Delete remaining short films--------
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] Successfully deleted 5 rental entries for films under 60mins length that were never in inventory.
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] 
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] ######### DELETE END ############################
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO]   __ _       _     _              _
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] / _(_)     (_)   | |            | |
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] | |_ _ _ __  _ ___| |__   ___  __| |
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] |  _| | '_ \| / __| '_ \ / _ \/ _` |
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] | | | | | | | \__ \ | | |  __/ (_| |
+2023-01-08 18:34:22,403 [MainProcess] [root] [INFO] |_| |_|_| |_|_|___/_| |_|\___|\__,_|

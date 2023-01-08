@@ -12,7 +12,7 @@ import psycopg2
 import pymongo
 from pymongo import database
 # Benchmarking
-#from profilehooks import timecall
+# from profilehooks import timecall
 # Optimisation (https://softwaretester.info/python-profiling-with-pycharm-community-edition/)
 # install cprofilev
 # install snakeviz
@@ -508,17 +508,21 @@ def main():
         logging.info(f'--------Delete short films + rentals--------')
         inventory = list(MongoDB.db['inventory'].aggregate(short_films))
         logging.info(f"Selected short films with aggregation: {short_films}")
-        rental_cnt = 0
-        for item in inventory:
-            rents = list(MongoDB.db['rental'].aggregate([{'$match': {'inventory_id': item['inventory_id']}}]))
-            for rent in rents:
-                MongoDB.db['payment'].delete_many({'rental_id': rent['rental_id']})
-            MongoDB.db['rental'].delete_many({'inventory_id': item['inventory_id']})
-            MongoDB.db['inventory'].delete_many({'inventory_id': item['inventory_id']})
-            MongoDB.db['film'].delete_many({'film_id': item['film_id']})
-            rental_cnt += len(rents)
-        logging.info(f'{len(inventory)} short films deleted successfully from inventory.')
-        logging.info(f'{rental_cnt} corresponding rental entries were deleted as well.')
+
+        inventory_ids = [item['inventory_id'] for item in inventory]
+        film_ids = [item['film_id'] for item in inventory]
+        rents = list(MongoDB.db['rental'].aggregate([{'$match': {'inventory_id':{'$in': inventory_ids}}}]))
+        rent_ids = [rent['rental_id'] for rent in rents]
+
+        del_payment = MongoDB.db['payment'].delete_many({'rental_id': {'$in': rent_ids}})
+        del_rental = MongoDB.db['rental'].delete_many({'inventory_id': {'$in': inventory_ids}})
+        del_inventory = MongoDB.db['inventory'].delete_many({'inventory_id': {'$in': inventory_ids}})
+        del_film = MongoDB.db['film'].delete_many({'film_id': {'$in': film_ids}})
+
+        logging.info(f'{del_payment.deleted_count} short film entries deleted successfully from payments.')
+        logging.info(f'{del_rental.deleted_count} short film entries deleted successfully from rental.')
+        logging.info(f'{del_inventory.deleted_count} short films deleted successfully from inventory.')
+        logging.info(f'{del_film.deleted_count} short films deleted from film database.')
         logging.info("")
         # now deleting films that were never in inventory
         logging.info(f'--------Delete remaining short films--------')
